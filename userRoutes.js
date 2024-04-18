@@ -2,7 +2,7 @@ const express = require('express')
 const bcrypt = require('bcrypt');
 const User = require('./model');
 const jwt = require("jsonwebtoken")
-const { generateOTP, transporter } = require('./utils');
+const { generateOTP, transporter, verifyToken } = require('./utils');
 
 const router = express.Router();
 
@@ -71,7 +71,19 @@ router.post('/register', async (req, res) => {
       return res.status(401).json({ error: 'Invalid password' });
     }
     const token = jwt.sign({ userId: user._id }, process.env.SECRET , { expiresIn: '1h' });
+    console.log(token);
     res.json({ token });
+  });
+
+  router.get('/user', verifyToken, async (req, res) => {
+    const userId = req.userId;
+    console.log(userId);
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+  
+    res.json({ user });
   });
   
   
