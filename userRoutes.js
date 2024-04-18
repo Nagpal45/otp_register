@@ -40,4 +40,22 @@ router.post('/register', async (req, res) => {
     });
   });
 
+  router.post('/verifyOtp', async (req, res) => {
+    const { email, otp, location, age, work } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    if (user.otp !== otp) {
+      return res.status(401).json({ error: 'Invalid OTP' });
+    }
+    user.location = location;
+    user.age = age;
+    user.work = work;
+    user.otp = '';
+    await user.save();
+  
+    res.json({ message: 'User information updated successfully' });
+  });
+
 module.exports = router;
